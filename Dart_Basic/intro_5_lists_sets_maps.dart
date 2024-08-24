@@ -69,6 +69,8 @@ void main(){
     5:{6:"Rami"}
   };
 
+  map[7]="Basel"; // insert
+
   print(map);
 
   print(map[1]); // get value from key
