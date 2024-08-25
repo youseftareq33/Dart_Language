@@ -9,16 +9,15 @@ Map<int,Teacher> teacher_records={};
 File student_file= File('/Dart/Projects/School_Record/record_data/student_record.txt');
 File teacher_file= File('/Dart/Projects/School_Record/record_data/teacher_record.txt');
 
-void main(){
+void main() async{
 
   print("================ School Record ================");
   // load data
-  readStudentInfo();
-  readTeacherInfo();
+  await readStudentInfo();
+  await readTeacherInfo();
+  
   for(;;){
 
-    int? option;
-    while(option!=5){
       print("---------------------------------------------------------------");
       print("Record Type:");
       print("1) Student Record"+"\n"+
@@ -51,6 +50,9 @@ void main(){
         exit(0);
       }      
       
+    int? option;
+    while(option!=5){
+      print("---------------------------------------------------------------");
       print("Record Option: ");
       print("1) Add Record"+"\n"+
             "2) Delete Record"+"\n"+
@@ -82,7 +84,7 @@ void main(){
             print("Student Average: ");
             double? stud_average=double.parse(stdin.readLineSync()!);
 
-            addStudentRecord(stud_id, stud_name, stud_average);
+            await addStudentRecord(stud_id, stud_name, stud_average);
           }
           else if(record_type=="teacher"){
             print("-- Add Teacher Record --");
@@ -93,10 +95,9 @@ void main(){
             print("Teacher Salary: ");
             double? teacher_salary=double.parse(stdin.readLineSync()!);
 
-            addTeacherRecord(teacher_id, teacher_name, teacher_salary);
+            await addTeacherRecord(teacher_id, teacher_name, teacher_salary);
           }
-
-        break;
+          break;
 
         case(2):
           if(record_type=="student"){
@@ -104,17 +105,16 @@ void main(){
             print("Student Id: ");
             int? stud_id=int.parse(stdin.readLineSync()!);
 
-            deleteStudentRecord(stud_id);
+            await deleteStudentRecord(stud_id);
           }
           else if(record_type=="teacher"){
             print("-- Delete Teacher Record --");
             print("Teacher Id: ");
             int? teacher_id=int.parse(stdin.readLineSync()!);
 
-            deleteTeacherRecord(teacher_id);
+            await deleteTeacherRecord(teacher_id);
           }
-        
-        break;
+          break;
 
         case(3):
           if(record_type=="student"){
@@ -122,27 +122,27 @@ void main(){
             print("Student Id: ");
             int? stud_id=int.parse(stdin.readLineSync()!);
 
-            updateStudentRecord(stud_id);
+            await updateStudentRecord(stud_id);
           }
           else if(record_type=="teacher"){
             print("-- Update Teacher Record --");
             print("Teacher Id: ");
             int? teacher_id=int.parse(stdin.readLineSync()!);
 
-            updateTeacherRecord(teacher_id);
+            await updateTeacherRecord(teacher_id);
           }
-        
-        break;
+          break;
 
         case(4):
           if(record_type=="student"){
+            print("Students Information: ");
             printStudentInfo();
           }
           else if(record_type=="teacher"){
+            print("Teacher Information: ");
             printTeacherInfo();
           }
-        
-        break;
+          break;
       }
 
     }
@@ -200,9 +200,21 @@ addStudentRecord(int? stud_id, String? stud_name, double? stud_average) async{
   print("Student "+"$stud_name"+" added succesfully");
 }
 
-deleteStudentRecord(int? stud_id){
+deleteStudentRecord(int? stud_id) async{
   if(student_records.containsKey(stud_id)){
     student_records.remove(stud_id!);
+
+    await student_file.writeAsString("", mode: FileMode.write);
+    
+    for (Student stud in student_records.values) {
+      if(await student_file.length()==0){
+        await student_file.writeAsString("${stud.getStudId}"+","+"${stud.getStudName}"+","+"${stud.getStudAverage}", mode: FileMode.append);
+      }
+      else{
+        await student_file.writeAsString("\n"+"${stud.getStudId}"+","+"${stud.getStudName}"+","+"${stud.getStudAverage}", mode: FileMode.append);
+      }
+    };
+
     print("Student with this id: "+"$stud_id"+" deleted succesfully");
   }
   else{
@@ -211,13 +223,24 @@ deleteStudentRecord(int? stud_id){
   
 }
 
-updateStudentRecord(int? stud_id){
+updateStudentRecord(int? stud_id) async{
   if(student_records.containsKey(stud_id)){
     print("Student name: ");
     String? stud_name=stdin.readLineSync()!;
     print("Student Average: ");
     double? stud_average=double.parse(stdin.readLineSync()!);
     student_records[stud_id!]=Student(stud_id, stud_name, stud_average);
+
+    await student_file.writeAsString("", mode: FileMode.write);
+
+    for (Student stud in student_records.values) {
+      if(await student_file.length()==0){
+        await student_file.writeAsString("${stud.getStudId}"+","+"${stud.getStudName}"+","+"${stud.getStudAverage}", mode: FileMode.append);
+      }
+      else{
+        await student_file.writeAsString("\n"+"${stud.getStudId}"+","+"${stud.getStudName}"+","+"${stud.getStudAverage}", mode: FileMode.append);
+      }
+    };
 
     print("Student with this id: "+"$stud_id"+" updated succesfully");
   }
@@ -277,9 +300,21 @@ addTeacherRecord(int? teacher_id, String? teacher_name, double? teacher_salary) 
   print("Teacher "+"$teacher_name"+" added succesfully");
 }
 
-deleteTeacherRecord(int? teacher_id){
+deleteTeacherRecord(int? teacher_id) async{
   if(teacher_records.containsKey(teacher_id)){
     teacher_records.remove(teacher_id!);
+
+    await teacher_file.writeAsString("", mode: FileMode.write);
+    
+    for (Teacher teacher in teacher_records.values) {
+      if(await teacher_file.length()==0){
+        await teacher_file.writeAsString("${teacher.getTeacherId}"+","+"${teacher.getTeacherName}"+","+"${teacher.getTeacherSalary}", mode: FileMode.append);
+      }
+      else{
+        await teacher_file.writeAsString("\n"+"${teacher.getTeacherId}"+","+"${teacher.getTeacherName}"+","+"${teacher.getTeacherSalary}", mode: FileMode.append);
+      }
+    };
+
     print("Teacher with this id: "+"$teacher_id"+" deleted succesfully");
   }
   else{
@@ -288,13 +323,24 @@ deleteTeacherRecord(int? teacher_id){
   
 }
 
-updateTeacherRecord(int? teacher_id){
+updateTeacherRecord(int? teacher_id) async{
   if(teacher_records.containsKey(teacher_id)){
     print("Teacher name: ");
     String? teacher_name=stdin.readLineSync()!;
     print("Teacher Salary: ");
     double? teacher_salary=double.parse(stdin.readLineSync()!);
     teacher_records[teacher_id!]=Teacher(teacher_id, teacher_name, teacher_salary);
+
+    await teacher_file.writeAsString("", mode: FileMode.write);
+    
+    for (Teacher teacher in teacher_records.values) {
+      if(await teacher_file.length()==0){
+        await teacher_file.writeAsString("${teacher.getTeacherId}"+","+"${teacher.getTeacherName}"+","+"${teacher.getTeacherSalary}", mode: FileMode.append);
+      }
+      else{
+        await teacher_file.writeAsString("\n"+"${teacher.getTeacherId}"+","+"${teacher.getTeacherName}"+","+"${teacher.getTeacherSalary}", mode: FileMode.append);
+      }
+    };
 
     print("Teacher with this id: "+"$teacher_id"+" updated succesfully");
   }
